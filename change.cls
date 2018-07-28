@@ -25,7 +25,7 @@ Set regx = CreateObject("vbscript.regexp")
             Next
         Next
 
-         regx.Pattern = "(\[del\](.*?)\[/del\])"sssssssssss
+         regx.Pattern = "(\[del\](.*?)\[/del\])"
         For Each i In ActiveDocument.Paragraphs
             For Each mt In .Execute(i.Range.Text)
                 m = mt.FirstIndex: n = mt.Length
