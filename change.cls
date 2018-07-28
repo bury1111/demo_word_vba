@@ -9,9 +9,12 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Sub change()
      Dim i As Paragraph, mt, oRang As Range, n%, m%
-    With CreateObject("vbscript.regexp")
-        .Pattern = "(\[add\](.*?)\[/add\])"
-        .Global = True: .IgnoreCase = False: .MultiLine = True
+Set regx = CreateObject("vbscript.regexp")
+        regx.Pattern = "(\[add\](.*?)\[/add\])"
+        regx.Global = True
+        regx.IgnoreCase = False
+        regx.MultiLine = True
+  
         For Each i In ActiveDocument.Paragraphs
             For Each mt In .Execute(i.Range.Text)
                 m = mt.FirstIndex: n = mt.Length
@@ -21,11 +24,8 @@ Sub change()
                 oRang.Font.Underline = wdUnderlineSingle
             Next
         Next
-    End With
-    
-    With CreateObject("vbscript.regexp")
-        .Pattern = "(\[del\](.*?)\[/del\])"
-        .Global = True: .IgnoreCase = False: .MultiLine = True
+
+         regx.Pattern = "(\[del\](.*?)\[/del\])"sssssssssss
         For Each i In ActiveDocument.Paragraphs
             For Each mt In .Execute(i.Range.Text)
                 m = mt.FirstIndex: n = mt.Length
@@ -35,6 +35,6 @@ Sub change()
                 oRang.Font.StrikeThrough = True
             Next
         Next
-    End With
+   
 End Sub
 
