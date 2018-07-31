@@ -1,0 +1,112 @@
+
+
+_killWinword();
+
+basicPath:= "C:\\Users\\bury\\Desktop\\replaceWordCont\\";
+initFile:= 'init.docx';
+wordPath:= basicPath$"doc_"$formatdatetime('mmddhhMMsszzz',now())$(random()*100000)$".docx";
+if not FileCopy("",basicPath$initFile,"",wordPath,1) then
+  return echo 'error:复制文件失败！';
+
+_setWordRevision(wordPath);
+
+_killWinword();
+
+function _setWordRevision(wordPath);
+begin
+  getOleObject('word.application',3,wApp);
+  if not ifObj(wApp) then
+    return false;
+  if not FileExists('',wordPath) then
+    return false;
+
+  docObj := wApp.documents.Open(wordPath);
+  if not ifObj(docObj) then
+    return false;
+
+
+
+
+  //统计标签总数
+  c:=0;
+echo '\r\n开始统计add个数======count:',c;
+  cnt:= docObj.ActiveWindow.ActivePane.Selection;
+  while cnt.find.Execute("add") do
+  begin
+    echo '\r\n-----',c;
+    c+=1;
+  end;
+   echo '\r\n======count:',c;
+
+   //del标签计数(未解决)
+     d:=0;
+   echo '\r\n开始统计del个数======count:',d;
+    cnt2:= docObj.ActiveWindow.ActivePane.Selection;
+    cnt2.Find.ClearFormatting;
+    cnt2.WholeStory;
+    cnt2.HomeKey(wdLine());
+    while cnt2.find.Execute("del") do
+    begin
+      echo '\r\n-----',d;
+      d+=1;
+    end;
+     echo '\r\n======count:',d/2;
+
+
+  myrange:= docObj.ActiveWindow.ActivePane.Selection;
+//add标签处理
+  echo '\r\n-----add标签处理begin';
+
+  i:=0;
+  while myrange.Find.Execute("(add)(*)(/add)", false, false, true, false, false, true,
+                       wdFindContinue(), false,'', wdReplaceNone(),
+                       false, false, false, false) do
+  begin
+    i++;
+    echo '\r\n---------',i;
+    if i>c then
+      break;
+    tmpObj:= myrange;
+    tmpObj.Font.Bold:= true;
+    tmpObj.Font.Color:= wdColorBlue();
+    tmpObj.Font.Underline:= wdUnderlineSingle();
+
+  end;
+
+
+//del标签处理
+echo '\r\n-----del标签处理begin';
+  j:=0;
+  while myrange.Find.Execute("(del)(*)(/del)", false, false, true, false, false, true,
+                       wdFindContinue(), false,'', wdReplaceNone(),
+                       false, false, false, false) do
+  begin
+    j++;
+    echo '\r\n---------',j;
+    if j>(d/2) then
+      break;
+    tmpObj:= myrange;
+    tmpObj.Font.Bold:= true;
+    tmpObj.Font.Color:= wdColorRed();
+    tmpObj.Font.StrikeThrough:= true;
+
+  end;
+  //删除标签
+  myrange.Find.Execute("\\[*\\]", false, false, true, false, false, false,
+                    wdFindContinue(), true,'', wdReplaceAll(),
+                    false, false, false, false);
+
+
+  docObj.Application.Templates("Normal.dotm").Saved := true;
+  docObj.close(wdSaveChanges());
+  echo '\r\n\r\n';
+
+end;
+
+
+function _killWinword();
+begin
+  execHandle := sysExec('C:\\Windows\\System32\\taskkill.exe',' /im "winword.exe" /f',0,0,returncode);
+  SysCloseHandle(execHandle);
+  sleep(1*1000);
+end;
